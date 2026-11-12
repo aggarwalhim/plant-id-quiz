@@ -21,6 +21,8 @@ button{font:600 15px var(--font);border:1px solid var(--acc);background:var(--ca
 button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 button.on,button.p{background:var(--acc);color:var(--acc-ink)}
 .seg button{flex:1 1 0;text-align:center;min-width:0}
+.sets{display:grid;grid-template-columns:1fr 1fr}
+.sets button{text-align:center;min-width:0}
 .opt{display:block;width:100%;margin:6px 0}
 .opt.ok{background:var(--ok);border-color:var(--ok);color:var(--acc-ink)}
 .opt.bad{border-color:var(--bad);color:var(--bad)}
@@ -141,9 +143,69 @@ const hd3=["Drug","Unit","Clues","Case file"];
 const row3=d=>[`<b>${d[0]}</b>`,`${d[1]}<br><span class='mute'>${U[d[1]]}</span>`,d[2].map(c=>`<b>${c[0]}:</b> ${c[1]}`).join("<br>"),d[5]];
 const txt3=d=>[d[0],U[d[1]],d[2].map(c=>c.join(" ")).join(" "),d[5]].join(" ");
 
+/* ---------- Set 4: Crude drug list (notes pages 1-2 plus added list) ---------- */
+// [drug, synonyms[], biological source, family, entry (n = from notes, a = added)]
+const L=[
+["Vinca",["Vinca rosea","Catharanthus"],"Catharanthus roseus","Apocynaceae","n"],
+["Rauwolfia",["Sarpagandha","Chandrika","Indian snake root"],"Rauwolfia serpentina","Apocynaceae","n"],
+["Belladonna",["Belladonna leaf","Belladonna herb","Folium belladonnae"],"Atropa belladonna","Solanaceae","n"],
+["Opium",["Crude opium","Raw opium","Gum opium"],"Papaver somniferum","Papaveraceae","n"],
+["Tea",["Folia thea","Camellia thea"],"Camellia sinensis (Thea sinensis)","Theaceae","n"],
+["Ruta",["Rue","Herb of grace"],"Ruta graveolens","Rutaceae","n"],
+["Liquorice",["Mulethi","Sweet wood","Liquorice root"],"Glycyrrhiza glabra","Leguminosae","n"],
+["Dioscorea",["Yam"],"Dioscorea deltoidea","Dioscoreaceae","n"],
+["Digitalis",["Fingerflower","Lady's glove"],"Digitalis purpurea","Scrophulariaceae","n"],
+["Mentha",["Peppermint oil","Mint","Pudina"],"Mentha piperita","Lamiaceae","n"],
+["Clove",["Caryophyllum"],"Eugenia caryophyllus","Myrtaceae","n"],
+["Cinnamon",["Dalchini","Cinnamon bark"],"Cinnamomum zeylanicum","Lauraceae","n"],
+["Fennel",["Sweet fennel","Saunf"],"Foeniculum vulgare","Umbelliferae","n"],
+["Coriander",["Dhaniya","Cilantro"],"Coriandrum sativum","Umbelliferae","n"],
+["Catechu",["Katha","Cutch"],"Acacia catechu (wood)","Leguminosae","n"],
+["Pterocarpus",["Indian kino tree","Red sandalwood"],"Pterocarpus marsupium","Leguminosae","n"],
+["Benzoin",["Balsam","Styrax resin","Benzoin resin"],"Styrax species (genus Styrax)","Styraceae","n"],
+["Guggul",["Gum guggul","Salai guggul"],"Commiphora mukul","Burseraceae","n"],
+["Ginger",["Rhizoma zingiberis","Zingiber"],"Zingiber officinale","Zingiberaceae","n"],
+["Asafoetida",["Devil's drug","Asafoda","Hing"],"Ferula asafoetida","Umbelliferae","n"],
+["Myrrh",["Gum-resin myrrh","Myrrha"],"Commiphora molmol","Burseraceae","n"],
+["Colophony",["Rosin","Amber resin","Colophony resin"],"Pinus pinaster","Pinaceae","n"],
+["Senna",["Alexandrian senna","Folia senna"],"Cassia acutifolia / Cassia angustifolia","Leguminosae","n"],
+["Aloes",["Aloe vera","Aloe"],"Aloe barbadensis / Aloe ferox","Liliaceae","n"],
+["Bitter almond",["Nut","Almond"],"Prunus amygdalus","Rosaceae","n"],
+["Gentian",["Gentian root","Yellow gentian"],"Gentiana lutea","Gentianaceae","n"],
+["Artemisia",["Wormseed"],"Artemisia annua","Asteraceae","n"],
+["Taxus",["Yew"],"Taxus brevifolia","Taxaceae","n"],
+["Ashoka bark",["Ashoka","Asoka"],"Saraca asoca","Leguminosae","a"],
+["Arjuna bark",["Arjun"],"Terminalia arjuna","Combretaceae","a"],
+["Areca nut",["Betel nut","Supari"],"Areca catechu","Arecaceae","a"],
+["Ajowan",["Ajwain","Bishop's weed"],"Trachyspermum ammi","Umbelliferae","a"],
+["Ashwagandha",["Winter cherry","Indian ginseng"],"Withania somnifera","Solanaceae","a"],
+["Bavchi",["Babchi","Bakuchi"],"Psoralea corylifolia","Leguminosae","a"],
+["Brahmi",["Water hyssop","Bacopa"],"Bacopa monnieri","Scrophulariaceae","a"],
+["Chirata",["Chiretta","Indian gentian"],"Swertia chirata","Gentianaceae","a"],
+["Cardamom (small)",["Choti elaichi","Green cardamom"],"Elettaria cardamomum","Zingiberaceae","a"],
+["Datura seed",["Thorn apple","Dhatura"],"Datura stramonium","Solanaceae","a"],
+["Guar gum",["Cluster bean gum"],"Cyamopsis tetragonoloba","Leguminosae","a"],
+["Gokhru",["Gokshura","Puncture vine"],"Tribulus terrestris","Zygophyllaceae","a"],
+["Heena",["Henna","Mehndi"],"Lawsonia inermis","Lythraceae","a"],
+["Isapghol seeds",["Ispaghula","Psyllium","Isabgol"],"Plantago ovata","Plantaginaceae","a"],
+["Kalmegh",["Green chiretta","King of bitters"],"Andrographis paniculata","Acanthaceae","a"],
+["Methi",["Fenugreek"],"Trigonella foenum-graecum","Leguminosae","a"],
+["Alum",["Phitkari"],"Mineral: hydrated potassium aluminium sulphate (not a plant)","","a"]];
+const T4={
+bs:[d=>`What is the biological source of <b>${d[0]}</b>?`,d=>d[2],ok1],
+sb:[d=>`Which drug comes from <i>${d[2]}</i>?`,d=>d[0],d=>L.filter(x=>key(x[2])===key(d[2])).length===1],
+fm:[d=>`<b>${d[0]}</b> belongs to which family?`,d=>d[3],d=>!!d[3]],
+sy:[d=>`Which drug is also known as <b>${d.syn}</b>?`,d=>d[0],d=>d[1].length>0&&L.filter(x=>x[1].includes(d.syn||d[1][0])).length<=1]};
+const M4=[["bs","Drug → biological source"],["sb","Biological source → drug"],["fm","Drug → family"],["sy","Synonym → drug"]];
+const fb4=d=>`<b>${d[0]}</b>: ${d[2]}.${d[3]?" Family: "+d[3]+".":""}`;
+const hd4=["Drug","Biological source","Family"];
+const row4=d=>[`<b>${d[0]}</b>${d[4]=="a"?" <span class='mute'>(added)</span>":""}${d[1].length?"<br><span class='mute'>"+d[1].join(", ")+"</span>":""}`,d[2],d[3]||"&ndash;"];
+const txt4=d=>[d[0],d[1].join(" "),d[2],d[3]].join(" ");
+
 const SETS={
 drugs:{name:"Drugs from plants",rows:D,T:T1,M:M1,fb:fb1,hd:hd1,row:row1,txt:txt1,intro:"Scientific name, chemical constituent and use. No timer, instant feedback."},
 aids:{name:"Pharmaceutical aids",rows:A,T:T2,M:M2,fb:fb2,hd:hd2,row:row2,txt:txt2,intro:"Enzymes, lipids, fibres, gums and bee products from the class notes: sources, families and regions."},
+list:{name:"Crude drug list",rows:L,T:T4,M:M4,fb:fb4,hd:hd4,row:row4,txt:txt4,intro:"Synonyms, biological source and family of 28 drugs from your notes, plus 17 added drugs (marked added, check them against your syllabus)."},
 cases:{name:"Crude drug casebook",rows:C,T:T3,M:M3,fb:fb3,hd:hd3,row:row3,txt:txt3,intro:"The Pharmacognosy I casebook as quick questions. Read the clues, name the drug, then check the case file."}};
 let setK="drugs",tabK="study";
 
@@ -154,7 +216,7 @@ const S=()=>SETS[setK];
 function home(tab,set){
 if(set)setK=set;tabK=tab||tabK;
 app.innerHTML=`<h1>Plant ID Quiz</h1><div class="mute">${S().intro}</div>
-<div class="row seg">${Object.keys(SETS).map(k=>`<button class="${k==setK?'on':''}" onclick="home('${tabK}','${k}')">${SETS[k].name}</button>`).join("")}</div>
+<div class="row sets">${Object.keys(SETS).map(k=>`<button class="${k==setK?'on':''}" onclick="home('${tabK}','${k}')">${SETS[k].name}</button>`).join("")}</div>
 <div class="row seg"><button class="${tabK=='quiz'?'':'on'}" onclick="home('study')">Study cards</button><button class="${tabK=='quiz'?'on':''}" onclick="home('quiz')">Quiz</button></div><div id="v"></div>`;
 if(tabK=='quiz')menu();else study()}
 

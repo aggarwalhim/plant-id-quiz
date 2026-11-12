@@ -6,6 +6,7 @@ A free, single-page study and quiz tool for B.Pharm and D.Pharm students (Pharma
 
 - **Drugs from plants:** common name, scientific name, constituent, chemical class and use.
 - **Pharmaceutical aids:** enzymes, proteins, lipids, fibres, gums and bee products with synonyms, biological source, family and geographical source.
+- **Crude drug list:** 28 drugs from class notes (synonyms, biological source, family) plus 17 added drugs marked "added" in the study table. Check added entries against your syllabus.
 - **Crude drug casebook:** Pharmacognosy I cases (Units I to V) turned into clue-based questions, with the case file as feedback.
 
 Each set has searchable study cards and quizzes of 10 questions, including a mixed mode.
@@ -22,4 +23,4 @@ Open `index.html` in a browser.
 
 ## Adding content
 
-All data is in the arrays at the top of the `<script>` in `index.html` (`D`, `A` and `C`). Each row is documented by a comment above its array.
+All data is in the arrays at the top of the `<script>` in `index.html` (`D`, `A`, `L` and `C`). Each row is documented by a comment above its array.
