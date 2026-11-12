@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plant ID Quiz</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: single centered column; set switcher, then tabs, then study table or quiz card. Green botanical palette on pale leaf ground. */
+:root{--bg:#f1f6ee;--card:#ffffff;--ink:#1f2a1f;--mute:#5f6f5f;--acc:#2f7d4f;--acc-ink:#ffffff;--ok:#2f7d4f;--bad:#b3392f;--line:#d6e2d0;--tint:rgba(47,125,79,.08);--font:'Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;--head:'Space Grotesk','Inter',system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141b15;--card:#1d271e;--ink:#e8f1e6;--mute:#9db09b;--acc:#5fc08a;--acc-ink:#0f1a12;--ok:#5fc08a;--bad:#e8776d;--line:#2f3f30;--tint:rgba(95,192,138,.12);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141b15;--card:#1d271e;--ink:#e8f1e6;--mute:#9db09b;--acc:#5fc08a;--acc-ink:#0f1a12;--ok:#5fc08a;--bad:#e8776d;--line:#2f3f30;--tint:rgba(95,192,138,.12);color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--font);padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:680px;margin:0 auto}
+h1{font:700 26px/1.2 var(--head);margin:6px 0;text-wrap:balance}
+h2{font:700 22px var(--head);margin:0 0 6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+.row{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+button{font:600 15px var(--font);border:1px solid var(--acc);background:var(--card);color:var(--ink);padding:10px 14px;border-radius:10px;cursor:pointer;text-align:left}
+button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button.on,button.p{background:var(--acc);color:var(--acc-ink)}
+.seg button{flex:1 1 0;text-align:center;min-width:0}
+.opt{display:block;width:100%;margin:6px 0}
+.opt.ok{background:var(--ok);border-color:var(--ok);color:var(--acc-ink)}
+.opt.bad{border-color:var(--bad);color:var(--bad)}
+.bar{display:flex;justify-content:space-between;color:var(--mute);font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.q{font-size:19px;font-weight:600;margin:10px 0;overflow-wrap:anywhere}
+.fb{border-left:3px solid var(--acc);padding:6px 12px;margin:10px 0;background:var(--tint);border-radius:0 8px 8px 0}
+.sc{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{color:var(--mute);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+input{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:16px var(--font)}
+.mute{color:var(--mute);font-size:14px}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@700&display=swap">
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* ---------- Set 1: Drugs from plants ---------- */
+// [common name, scientific name, constituent, chemical class, use, group]
+const D=[
+["Clove","Syzygium aromaticum","Eugenol","Phenolic volatile oil","Toothache relief (dental analgesic)"],
+["Cinchona","Cinchona officinalis","Quinine","Alkaloid","Malaria treatment"],
+["Opium poppy","Papaver somniferum","Morphine","Alkaloid","Strong pain relief (narcotic analgesic)"],
+["Foxglove","Digitalis purpurea","Digitoxin","Cardiac glycoside","Heart failure (cardiotonic)"],
+["Senna","Cassia angustifolia","Sennosides","Anthraquinone glycoside","Constipation (stimulant laxative)","lax"],
+["Sarpagandha","Rauwolfia serpentina","Reserpine","Alkaloid","High blood pressure"],
+["Periwinkle","Catharanthus roseus","Vinblastine","Alkaloid","Cancer chemotherapy"],
+["Ephedra","Ephedra sinica","Ephedrine","Alkaloid","Asthma and nasal decongestion"],
+["Belladonna","Atropa belladonna","Atropine","Alkaloid","Dilates pupils, antispasmodic"],
+["Ginger","Zingiber officinale","Gingerol","Phenolic pungent principle","Nausea and vomiting"],
+["Turmeric","Curcuma longa","Curcumin","Diarylheptanoid polyphenol","Anti-inflammatory, wound healing"],
+["Liquorice","Glycyrrhiza glabra","Glycyrrhizin","Saponin glycoside","Cough and peptic ulcer"],
+["Aloe","Aloe barbadensis","Aloin","Anthraquinone glycoside","Burns and skin healing"],
+["Castor","Ricinus communis","Ricinoleic acid","Fatty acid (glyceride)","Lubricant and mild purgative oil","lax"],
+["Papaya","Carica papaya","Papain","Enzyme (protease)","Protein digestion, meat tenderizer"],
+["Cannabis","Cannabis sativa","THC (tetrahydrocannabinol)","Cannabinoid","Hallucinogenic drug (bhang, ganja)"],
+["Ashwagandha","Withania somnifera","Withanolides","Steroidal lactone","Stress relief, general tonic (adaptogen)"],
+["Neem","Azadirachta indica","Azadirachtin","Triterpenoid (limonoid)","Natural insecticide and antiseptic"],
+["Nux vomica","Strychnos nux-vomica","Strychnine","Alkaloid","CNS stimulant, bitter tonic"],
+["Peppermint","Mentha piperita","Menthol","Terpene alcohol (volatile oil)","Flatulence and flavouring"],
+["Autumn crocus","Colchicum autumnale","Colchicine","Alkaloid","Gout"],
+["Garlic","Allium sativum","Allicin","Sulphur compound","Lowers cholesterol, antimicrobial"]];
+const nm=d=>`${d[0]} (${d[1]})`;
+const ok1=()=>true;
+const T1={
+sc:[d=>`${nm(d)} contains which chemical constituent?`,d=>d[2],ok1],
+cs:[d=>`Which plant contains <b>${d[2]}</b>?`,nm,ok1],
+us:[d=>`Which plant is used for: <b>${d[4]}</b>?`,nm,ok1],
+su:[d=>`What is ${nm(d)} mainly used for?`,d=>d[4],ok1],
+cl:[d=>`${d[2]} is what type of compound?`,d=>d[3],ok1]};
+const M1=[
+["sc","Scientific name → constituent"],["cs","Constituent → plant"],["su","Scientific name → use"],["us","Use → plant"],["cl","Constituent → chemical class"]];
+const fb1=d=>`${d[0]}, <i>${d[1]}</i>: ${d[2]} (${d[3]}). Use: ${d[4]}.`;
+const hd1=["Plant","Constituent","Class","Use"];
+const row1=d=>[`<b>${d[0]}</b><br><i>${d[1]}</i>`,d[2],d[3],d[4]];
+const txt1=d=>d.join(" ");
+
+/* ---------- Set 2: Pharmaceutical aids (class notes) ---------- */
+// [name, synonyms[], biological source, family, geographical source, category]
+const A=[
+["Gelatin",["Puragel","Gelatinum"],"Ovis aries / Bos taurus","Bovidae","","Protein"],
+["Casein",[],"Bos taurus (milk phosphoprotein)","Bovidae","","Protein"],
+["Papain",["Papayotin"],"Carica papaya","Caricaceae","Sri Lanka, India","Enzyme"],
+["Bromelain",["Bromelin"],"Ananas comosus","Bromeliaceae","India, China, Mexico","Enzyme"],
+["Serratiopeptidase",[],"Serratia (Enterobacteria)","","","Enzyme"],
+["Urokinase",["Uroquinase"],"Human urine / kidney tissue culture","","","Enzyme"],
+["Streptokinase",["Plasminokinase"],"Streptococcus group C","","","Enzyme"],
+["Pepsin",[],"Sus scrofa (pig)","Suidae","","Enzyme"],
+["Castor oil",["Castor bean oil","Oil of Palma Christi"],"Ricinus communis","Euphorbiaceae","Brazil, USA, India","Lipid"],
+["Chaulmoogra oil",["Hydnocarpus oil","Gynocardia oil"],"Hydnocarpus heterophylla","Flacourtiaceae","India","Lipid"],
+["Wool fat",["Lanolin","Wool wax"],"Ovis aries (sheep)","Bovidae","USA, India","Lipid"],
+["Beeswax",["Madhujan","Yellow and white beeswax"],"Apis mellifera (bees)","Apidae","Africa, India","Lipid"],
+["Cotton",["Absorbent cotton","Surgical cotton"],"Gossypium herbaceum / G. barbadense","Malvaceae","USA, India","Fibre"],
+["Jute",["Gunny"],"Corchorus olitorius / C. capsularis","Tiliaceae","West Bengal, Assam","Fibre"],
+["Hemp",["Cannabis","Marijuana"],"Cannabis sativa","Cannabinaceae","West Bengal, Madhya Pradesh","Fibre"],
+["Acacia",["Gum acacia","Babul"],"Acacia arabica","Leguminosae","India, Sri Lanka","Gum"],
+["Agar",["Agar-agar","Gelose","Vegetable gelatin"],"Gelidium amansii","Gelidiaceae","USA, India","Gum"],
+["Tragacanth",["Gum tragacanth","Katira"],"Astragalus gummifer","Leguminosae","America, India, Turkey","Gum"],
+["Honey",["Madhu","Madh"],"Apis mellifera / A. indica / A. florea","Apidae","India, New Zealand, Africa","Bee product"]];
+const key=s=>s.split(/[ \/(]+/).slice(0,2).join(" ");
+const uniq=d=>A.filter(x=>key(x[2])===key(d[2])).length===1;
+const T2={
+bs:[d=>`What is the biological source of <b>${d[0]}</b>?`,d=>d[2],ok1],
+sb:[d=>`Which substance comes from <i>${d[2]}</i>?`,d=>d[0],uniq],
+fm:[d=>`<b>${d[0]}</b> belongs to which family?`,d=>d[3],d=>!!d[3]],
+gs:[d=>`Which region is a geographical source of <b>${d[0]}</b>?`,d=>d[4],d=>!!d[4]],
+sy:[d=>`Which substance is also known as <b>${d.syn}</b>?`,d=>d[0],d=>d[1].length>0],
+ct:[d=>`<b>${d[0]}</b> is classed as which type of substance?`,d=>d[5],ok1]};
+const M2=[
+["bs","Substance → biological source"],["sb","Biological source → substance"],["fm","Substance → family"],["gs","Substance → geographical source"],["sy","Synonym → substance"],["ct","Substance → category"]];
+const fb2=d=>`${d[0]}: ${d[2]}.${d[3]?" Family: "+d[3]+".":""}${d[4]?" Source: "+d[4]+".":""}`;
+const hd2=["Substance","Biological source","Family","Geographical source","Category"];
+const row2=d=>[`<b>${d[0]}</b>${d[1].length?"<br><span class='mute'>"+d[1].join(", ")+"</span>":""}`,d[2],d[3]||"&ndash;",d[4]||"&ndash;",d[5]];
+const txt2=d=>[d[0],d[1].join(" "),d[2],d[3],d[4],d[5]].join(" ");
+
+/* ---------- Set 3: Crude Drug Casebook (Pharmacognosy I) ---------- */
+const U={1:"Introduction and quality control",2:"Cultivation and plant hormones",3:"Plant tissue culture",4:"Systems of medicine and secondary metabolites",5:"Primary metabolites and plant products"};
+// [name, unit, clues[[label,text]], suspects, [bonus question, options, correct index], case file]
+const C=[
+["Asafoetida",1,[["Macroscopy","Tears or lumps, yellowish to reddish-brown, darkening on exposure."],["Organoleptic","Persistent garlic-like sulphurous odour; bitter, acrid taste."],["Origin","Exudate from the incised roots of Ferula assa-foetida (Apiaceae)."],["Behaviour","Rubbed with water it forms a milky emulsion: resin, gum and volatile oil together."]],["Asafoetida","Acacia","Benzoin","Turpentine"],["How is asafoetida classified among unorganized drugs?",["Oleo-gum-resin","Dried latex","Pure gum","Oleo-resin"],0],"Asafoetida holds resin, gum and a sulphur-rich volatile oil, so it is an oleo-gum-resin. Unorganized drugs have no cellular structure, so they are judged by physical and chemical tests rather than microscopy. Uses: carminative, antispasmodic, expectorant."],
+["Lycopodium spore method",1,[["Principle","A known weight of drug powder is mixed with a known weight of a standard spore powder and the particles are counted under the microscope."],["Reference","The standard spores are uniform; about 94,000 spores per mg."],["Result","Gives the number of particles, and so the percentage of the drug in a powder."],["Source","Spores of Lycopodium clavatum."]],["Lycopodium spore method","Stomatal index","Vein-islet number","Palisade ratio"],["How is the stomatal index (a leaf constant) calculated?",["S / (E + S) x 100","E / (E + S) x 100","S x E","S / E"],0],"Quantitative microscopy includes the lycopodium spore method and the leaf constants (stomatal number and index, vein-islet number, vein-termination number, palisade ratio). S is stomata per unit area, E is epidermal cells per unit area. A camera lucida is used to draw objects to scale."],
+["Gibberellin",2,[["Source","First isolated from the fungus Gibberella fujikuroi."],["Effect","Stem elongation, breaks seed dormancy, induces flowering."],["Chemistry","Diterpenoid acids; the common one is GA3, gibberellic acid."],["Use","Applied in cultivation to promote growth and germination."]],["Gibberellin","Abscisic acid","Ethylene","Cytokinin"],["Which agent doubles chromosome number to produce polyploid medicinal plants?",["Colchicine","Gibberellic acid","Kinetin","Indole acetic acid"],0],"Plant hormones in cultivation: auxins (rooting), gibberellins (elongation, dormancy), cytokinins (cell division, shoots), ethylene (ripening), abscisic acid (dormancy, stress). Colchicine, from Colchicum, blocks spindle formation and doubles chromosomes. Polyploidy, mutation and hybridization are used to improve yield and active principle content."],
+["Murashige & Skoog (MS) medium",3,[["Principle","Totipotency: a single plant cell can regenerate a whole plant (Haberlandt)."],["Medium","Mineral salts, sucrose, vitamins, gelled with agar, plus growth regulators."],["Famous recipe","A 1962 formulation rich in nitrate and ammonium salts."],["Use","Callus culture, micropropagation, secondary metabolite production."]],["Murashige & Skoog (MS) medium","Mueller-Hinton agar","Sabouraud agar","Nutrient broth"],["Which hormone balance pushes callus towards shoot formation?",["High cytokinin to auxin ratio","High auxin to cytokinin ratio","Gibberellin only","Ethylene only"],0],"MS medium is the most widely used plant tissue culture medium. High auxin favours roots and callus; high cytokinin favours shoots. Applications include micropropagation, disease-free plants, somaclonal variation, biotransformation and edible vaccines (plants engineered to express antigens)."],
+["Rauwolfia",4,[["Macroscopy","Tortuous, cylindrical, tapering roots, greyish-brown, very bitter."],["Origin","Rauwolfia serpentina (Apocynaceae), Sarpagandha of Ayurveda."],["Chemical test","Extract gives an orange-red precipitate with Dragendorff's reagent."],["Use","Antihypertensive and tranquilizer."]],["Rauwolfia","Withania","Tinospora","Ocimum"],["Dragendorff's reagent is a solution of:",["Potassium bismuth iodide","Potassium mercuric iodide","Iodine in potassium iodide","Picric acid"],0],"Rauwolfia contains indole alkaloids: reserpine, ajmaline, ajmalicine, serpentine. Alkaloid reagents: Dragendorff (orange-red), Mayer (potassium mercuric iodide, cream), Wagner (iodine in KI, reddish-brown), Hager (picric acid, yellow)."],
+["Catechu",4,[["Macroscopy","Dark reddish-brown dried extract from the heartwood of Acacia catechu, in cubes or blocks."],["Test 1","Gelatin solution gives a white precipitate."],["Test 2","Ferric chloride gives a green colour."],["Hint","Green, not blue-black: that tells you the tannin class."]],["Catechu","Nutgall","Ginger","Clove"],["Hydrolysable (pyrogallol-type) tannins give which colour with FeCl3?",["Blue-black","Green","Red","Yellow"],0],"Catechu holds catechin and catechutannic acid, condensed (catechol-type) tannins that give green with FeCl3 and a red phlobaphene on heating. Nutgall gives gallotannic acid, a hydrolysable tannin, blue-black. Uses: astringent, antidiarrhoeal, tanning, dyeing."],
+["Clove",4,[["Macroscopy","Nail-shaped dried unopened flower buds, dark brown, a round head with four sepals."],["Organoleptic","Strong aromatic odour, pungent taste that numbs the tongue."],["Origin","Syzygium aromaticum (Myrtaceae), Zanzibar and Indonesia."],["Chemical test","Volatile oil rich in eugenol gives a blue colour with ferric chloride."]],["Clove","Cardamom","Fennel","Cinnamon"],["How does a volatile oil differ from a fixed oil on filter paper?",["The grease spot evaporates on warming","The spot is permanent","The spot turns blue","The spot dissolves in water"],0],"Clove oil, by steam distillation, contains 70-90% eugenol, a phenol. Uses: dental analgesic, antiseptic, carminative, flavour. Volatile oils are terpenoid or phenylpropanoid mixtures; fixed oils are glycerides."],
+["Agar",5,[["Source","Dried gelatinous extract of red algae (Gelidium, Gracilaria; Rhodophyceae)."],["Behaviour","Swells in cold water, dissolves in boiling water, a 1% solution sets to a firm gel on cooling."],["Chemistry","A galactan mixture of two fractions."],["Uses","Culture media, bulk laxative, suspending agent, suppository base."]],["Agar","Acacia","Tragacanth","Honey"],["Which agar component is the gelling fraction?",["Agarose","Agaropectin","Starch","Pectin"],0],"Agar is agarose (neutral, strongly gelling) and agaropectin (sulphated, weakly gelling). Contrast: acacia is a gum from Acacia senegal, tragacanth a swelling gum from Astragalus, honey an invert sugar from Apis."],
+["Castor oil",5,[["Source","Cold-expressed fixed oil from seeds of Ricinus communis (Euphorbiaceae)."],["Physical","Pale, very viscous liquid, soluble in alcohol, unusual for a fixed oil."],["Chemistry","About 90% triglyceride of ricinoleic acid, a hydroxylated fatty acid."],["Use","Purgative; also cosmetics and lubricants."]],["Castor oil","Chaulmoogra oil","Wool fat","Beeswax"],["Which of these lipids was used in the older treatment of leprosy?",["Chaulmoogra oil","Castor oil","Beeswax","Wool fat"],0],"The toxin ricin is a protein in the seed and stays in the cake, not the oil. Chaulmoogra oil (Hydnocarpus) holds cyclopentenyl fatty acids (chaulmoogric acid). Wool fat (lanolin) is a wax of sheep wool; beeswax is from Apis, mainly myricyl palmitate."],
+["Papain",5,[["Source","Dried latex from the unripe fruit of Carica papaya (Caricaceae)."],["Behaviour","White to pale-grey powder; digests proteins in acid, neutral and alkaline media."],["Class","A cysteine protease (sulphydryl enzyme)."],["Uses","Digestant, meat tenderizer, wound debridement."]],["Papain","Pepsin","Trypsin","Gelatin"],["Pepsin is obtained from which source?",["Glandular layer of pig stomach","Ox pancreas","Pineapple stem","Skin of animals"],0],"Proteins and enzymes in the syllabus: gelatin (collagen hydrolysate), casein (milk), pepsin (stomach), trypsin (pancreas), papain (papaya latex). Papain's unique feature is its wide pH range."],
+["Cannabis",5,[["Macroscopy","Palmately compound leaves with serrate leaflets; flowering tops of female plants are sticky with resin."],["Fibre","The stem bast fibres of this plant are hemp."],["Chemistry","The resin holds cannabinoids; the main psychoactive one is delta-9-THC."],["Test","Duquenois-Levine test gives a violet colour."]],["Cannabis","Jute","Cotton","Datura"],["Which is the principal psychoactive constituent of Cannabis?",["Delta-9-tetrahydrocannabinol","Cannabidiol","Morphine","Mescaline"],0],"Cannabis sativa (Cannabaceae) gives hemp fibre from its bast and hallucinogenic resin (charas, ganja, bhang). Jute is bast fibre of Corchorus; cotton is seed hair of Gossypium. Hallucinogens, teratogens and natural allergens are part of Unit V."]];
+const T3={
+cl:[d=>`Identify the crude drug or method from these clues:<br><i>${d.clue}</i>`,d=>d[0],ok1,d=>({a:d[0],o:d[3]})],
+bq:[d=>d[4][0],d=>d[4][1][d[4][2]],ok1,d=>({a:d[4][1][d[4][2]],o:d[4][1]})]};
+const M3=[["cl","Clues → crude drug"],["bq","Case bonus questions"]];
+const fb3=d=>`<b>${d[0]}</b> (Unit ${d[1]}). ${d[5]}`;
+const hd3=["Drug","Unit","Clues","Case file"];
+const row3=d=>[`<b>${d[0]}</b>`,`${d[1]}<br><span class='mute'>${U[d[1]]}</span>`,d[2].map(c=>`<b>${c[0]}:</b> ${c[1]}`).join("<br>"),d[5]];
+const txt3=d=>[d[0],U[d[1]],d[2].map(c=>c.join(" ")).join(" "),d[5]].join(" ");
+
+const SETS={
+drugs:{name:"Drugs from plants",rows:D,T:T1,M:M1,fb:fb1,hd:hd1,row:row1,txt:txt1,intro:"Scientific name, chemical constituent and use. No timer, instant feedback."},
+aids:{name:"Pharmaceutical aids",rows:A,T:T2,M:M2,fb:fb2,hd:hd2,row:row2,txt:txt2,intro:"Enzymes, lipids, fibres, gums and bee products from the class notes: sources, families and regions."},
+cases:{name:"Crude drug casebook",rows:C,T:T3,M:M3,fb:fb3,hd:hd3,row:row3,txt:txt3,intro:"The Pharmacognosy I casebook as quick questions. Read the clues, name the drug, then check the case file."}};
+let setK="drugs",tabK="study";
+
+const app=document.getElementById("app"),sh=a=>[...a].sort(()=>Math.random()-.5);
+let q,qi,score,locked;
+const S=()=>SETS[setK];
+
+function home(tab,set){
+if(set)setK=set;tabK=tab||tabK;
+app.innerHTML=`<h1>Plant ID Quiz</h1><div class="mute">${S().intro}</div>
+<div class="row seg">${Object.keys(SETS).map(k=>`<button class="${k==setK?'on':''}" onclick="home('${tabK}','${k}')">${SETS[k].name}</button>`).join("")}</div>
+<div class="row seg"><button class="${tabK=='quiz'?'':'on'}" onclick="home('study')">Study cards</button><button class="${tabK=='quiz'?'on':''}" onclick="home('quiz')">Quiz</button></div><div id="v"></div>`;
+if(tabK=='quiz')menu();else study()}
+
+function study(){document.getElementById("v").innerHTML=`<div class="card"><input id="f" placeholder="Search the table" aria-label="Search the table" oninput="tbl()"><div class="sc" id="t"></div></div>`;tbl()}
+function tbl(){const s=(document.getElementById("f").value||"").toLowerCase(),c=S();
+document.getElementById("t").innerHTML="<table><tr>"+c.hd.map(h=>`<th>${h}</th>`).join("")+"</tr>"+c.rows.filter(d=>c.txt(d).toLowerCase().includes(s)).map(d=>"<tr>"+c.row(d).map(x=>`<td>${x}</td>`).join("")+"</tr>").join("")+"</table>"}
+
+function menu(){tabK='quiz';document.getElementById("v").innerHTML=`<div class="card"><p>Pick a quiz (10 questions each):</p>`+
+S().M.map(m=>`<button class="opt" onclick="go('${m[0]}')">${m[1].replace("→","&rarr;")}</button>`).join("")+
+`<button class="opt p" onclick="go('mix')">Mixed (all types)</button></div>`}
+
+function go(m){const c=S(),T=c.T,ks=Object.keys(T);
+const pool0=m=='mix'?c.rows:c.rows.filter(T[m][2]);
+q=sh(pool0).slice(0,10).map(d=>{
+const avail=ks.filter(k=>T[k][2](d));const t=m=='mix'?avail[Math.floor(Math.random()*avail.length)]:m;
+const row=Object.assign([...d],{});
+if(Array.isArray(d[1])&&d[1].length)row.syn=d[1][Math.floor(Math.random()*d[1].length)];
+if(setK=='cases'){const nmk=d[0].toLowerCase().split(" ")[0];const cl=d[2].filter(x=>!x[1].toLowerCase().includes(nmk));row.clue=sh(cl).slice(0,2).map(x=>x[1]).join(" ")}
+const fo=T[t][3];
+if(fo){const r=fo(d);return{d:row,t,a:r.a,o:sh(r.o)}}
+const f=T[t][1],a=f(d);
+const pool=sh(c.rows.filter(x=>x!==d&&!(d[5]&&setK=='drugs'&&x[5]==d[5])&&f(x)&&f(x)!==a));const ops=[];
+for(const x of pool){if(!ops.includes(f(x)))ops.push(f(x));if(ops.length==3)break}
+return{d:row,t,a,o:sh([a,...ops])}});qi=0;score=0;show()}
+
+function show(){locked=false;const c=S();
+if(qi>=q.length){const m=score>=9?"Excellent, you know your drugs!":score>=6?"Good work, keep revising.":"Review the study cards and try again.";
+document.getElementById("v").innerHTML=`<div class="card"><h2>${score} / ${q.length}</h2><p>${m}</p><div class="row"><button class="p" onclick="menu()">Another quiz</button><button onclick="home('study')">Study cards</button></div></div>`;return}
+const x=q[qi];document.getElementById("v").innerHTML=`<div class="card"><div class="bar"><span>Question ${qi+1} of ${q.length}</span><span>Score ${score}</span></div><div class="q">${c.T[x.t][0](x.d)}</div>`+x.o.map((o,k)=>`<button class="opt" onclick="pick(${k})">${o}</button>`).join("")+`<div id="fb"></div></div>`}
+
+function pick(k){if(locked)return;locked=true;const x=q[qi],b=document.querySelectorAll(".opt");
+b.forEach((e,j)=>{if(x.o[j]==x.a)e.classList.add("ok");else if(j==k)e.classList.add("bad")});
+const right=x.o[k]==x.a;if(right)score++;
+document.getElementById("fb").innerHTML=`<div class="fb"><b>${right?"Correct!":"Not quite."}</b> ${S().fb(x.d)}</div><button class="p" onclick="qi++;show()">${qi<q.length-1?"Next":"See score"}</button>`}
+home('study');
+</script>
+</body>
+</html>
