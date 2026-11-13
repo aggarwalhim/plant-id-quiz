@@ -1,6 +1,6 @@
 # Plant ID Quiz
 
-A free, single-page study and quiz tool for B.Pharm and D.Pharm students (Pharmacognosy I). No build step, no dependencies, no timer, instant feedback.
+A free, single-page study and quiz tool for B.Pharm and D.Pharm students (Pharmacognosy I). No build step and no framework. Instant feedback, with optional timers.
 
 ## Game modes
 
