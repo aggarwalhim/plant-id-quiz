@@ -3,41 +3,159 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Plant ID Quiz</title>
+<title>Plant ID Quiz Demo</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Inter:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* Layout: single centered column; set switcher, then tabs, then study table or quiz card. Green botanical palette on pale leaf ground. */
-:root{--bg:#f1f6ee;--card:#ffffff;--ink:#1f2a1f;--mute:#5f6f5f;--acc:#2f7d4f;--acc-ink:#ffffff;--ok:#2f7d4f;--bad:#b3392f;--line:#d6e2d0;--tint:rgba(47,125,79,.08);--font:'Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;--head:'Space Grotesk','Inter',system-ui,sans-serif}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141b15;--card:#1d271e;--ink:#e8f1e6;--mute:#9db09b;--acc:#5fc08a;--acc-ink:#0f1a12;--ok:#5fc08a;--bad:#e8776d;--line:#2f3f30;--tint:rgba(95,192,138,.12);color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#141b15;--card:#1d271e;--ink:#e8f1e6;--mute:#9db09b;--acc:#5fc08a;--acc-ink:#0f1a12;--ok:#5fc08a;--bad:#e8776d;--line:#2f3f30;--tint:rgba(95,192,138,.12);color-scheme:dark}
+/* Layout: one column. Home (stats, set tiles, mode cards) leads to flashcards, quiz, match game and table. Colour encodes chemical class on every card, like reagent labels. */
+:root{--bg:#eef3ef;--sf:#ffffff;--ink:#14211a;--mute:#5b6b61;--line:#d3dfd7;--acc:#1f7a4d;--acc-ink:#ffffff;--ok:#1f7a4d;--bad:#c0392b;--soft:rgba(31,122,77,.09);
+--k1:#7a4fd6;--k2:#c98a00;--k3:#0f8f8a;--k4:#b5532a;--k5:#8a6a3c;--k6:#2f6fd0;--k7:#4f7a5a;--k8:#667085;
+--display:'Bricolage Grotesque','Inter',system-ui,sans-serif;--body:'Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1410;--sf:#16201a;--ink:#e6f0ea;--mute:#93a69a;--line:#26352c;--acc:#4fcf8f;--acc-ink:#06180f;--ok:#4fcf8f;--bad:#ff7a6b;--soft:rgba(79,207,143,.12);
+--k1:#a98bff;--k2:#f0b840;--k3:#3fd0c9;--k4:#e9885a;--k5:#c9a46c;--k6:#6aa2ff;--k7:#86c096;--k8:#a3acbb;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d1410;--sf:#16201a;--ink:#e6f0ea;--mute:#93a69a;--line:#26352c;--acc:#4fcf8f;--acc-ink:#06180f;--ok:#4fcf8f;--bad:#ff7a6b;--soft:rgba(79,207,143,.12);
+--k1:#a98bff;--k2:#f0b840;--k3:#3fd0c9;--k4:#e9885a;--k5:#c9a46c;--k6:#6aa2ff;--k7:#86c096;--k8:#a3acbb;color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--font);padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-main{max-width:680px;margin:0 auto}
-h1{font:700 26px/1.2 var(--head);margin:6px 0;text-wrap:balance}
-h2{font:700 22px var(--head);margin:0 0 6px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
-.row{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
-button{font:600 15px var(--font);border:1px solid var(--acc);background:var(--card);color:var(--ink);padding:10px 14px;border-radius:10px;cursor:pointer;text-align:left}
-button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-button.on,button.p{background:var(--acc);color:var(--acc-ink)}
-.seg button{flex:1 1 0;text-align:center;min-width:0}
-.sets{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-table.wide{min-width:820px}
-.sets button{text-align:center;min-width:0}
-.opt{display:block;width:100%;margin:6px 0}
-.opt.ok{background:var(--ok);border-color:var(--ok);color:var(--acc-ink)}
-.opt.bad{border-color:var(--bad);color:var(--bad)}
-.bar{display:flex;justify-content:space-between;color:var(--mute);font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
-.q{font-size:19px;font-weight:600;margin:10px 0;overflow-wrap:anywhere}
-.fb{border-left:3px solid var(--acc);padding:6px 12px;margin:10px 0;background:var(--tint);border-radius:0 8px 8px 0}
-.sc{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
-th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
-th{color:var(--mute);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
-input{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:16px var(--font)}
-.mute{color:var(--mute);font-size:14px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);padding-block:18px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:720px;margin:0 auto}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+h1{font:800 40px/1.05 var(--display);margin:2px 0 0;text-wrap:balance;letter-spacing:-.02em}
+.h2{font:800 26px/1.15 var(--display);margin:14px 0 8px;text-wrap:balance}
+.sec{font:700 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:26px 0 10px}
+.lab{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.intro{color:var(--mute);font-size:14px;margin:10px 0}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.leaf{color:var(--acc);flex:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.stats div{background:var(--sf);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column}
+.stats b{font:800 26px var(--display);font-variant-numeric:tabular-nums}
+.stats span{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.tile{background:var(--sf);border:1.5px solid var(--line);border-radius:14px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:6px;transition:transform .15s,border-color .15s}
+.tile:hover{transform:translateY(-2px)}
+.tile.on{border-color:var(--acc);box-shadow:0 0 0 3px var(--soft)}
+.tn{font:700 18px/1.2 var(--display)}
+.tc{font:500 12px var(--mono);color:var(--mute)}
+.pbar{height:6px;border-radius:9px;background:var(--line);overflow:hidden;display:block}
+.pbar i{display:block;height:100%;background:var(--acc);border-radius:9px}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.mode{background:var(--sf);border:1px solid var(--line);border-top:5px solid var(--acc);border-radius:14px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:4px;transition:transform .15s}
+.mode:hover{transform:translateY(-2px)}
+.mt{font:700 20px var(--display)}
+.md{font-size:14px;color:var(--mute)}
+.bk{background:none;border:0;color:var(--mute);font:600 14px var(--body);padding:6px 0}
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.streak{font:500 13px var(--mono);color:var(--mute);transition:color .2s}
+.streak b{font:800 18px var(--display);color:var(--ink)}
+.streak.hot{color:var(--k2)}.streak.bump b{display:inline-block;animation:bump .35s}
+@keyframes bump{50%{transform:scale(1.5)}}
+.dots{display:flex;gap:4px;margin:8px 0 14px}
+.dots i{flex:1;height:7px;border-radius:9px;background:var(--line);transition:background .25s}
+.dots i.cur{background:var(--mute)}.dots i.ok{background:var(--ok)}.dots i.bad{background:var(--bad)}
+.qcard,.card{background:var(--sf);border:1px solid var(--line);border-top:8px solid var(--cc,var(--acc));border-radius:16px;padding:18px}
+.card{border-top-width:1px}
+.qtext{font:700 22px/1.3 var(--display);margin:10px 0 16px;overflow-wrap:anywhere}
+.tbar{height:5px;background:var(--line);border-radius:9px;margin:10px 0 0;overflow:hidden}
+.tbar i{display:block;height:100%;width:100%;background:var(--cc,var(--acc))}
+.opt{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;transition:transform .12s,border-color .12s}
+.opt:hover:not(:disabled){transform:translateX(3px);border-color:var(--acc)}
+.opt:disabled{cursor:default}
+.key{flex:none;width:28px;height:28px;border-radius:8px;background:var(--sf);border:1px solid var(--line);display:grid;place-items:center;font:500 13px var(--mono)}
+.ot{overflow-wrap:anywhere}
+.opt.ok{background:var(--ok);border-color:var(--ok);color:var(--acc-ink);animation:pop .3s}
+.opt.bad{border-color:var(--bad);color:var(--bad);animation:shake .35s}
+.opt.gone{opacity:.25;text-decoration:line-through}
+@keyframes pop{50%{transform:scale(1.03)}}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .35s}
+.qfoot{display:flex;justify-content:flex-end;margin-top:4px}
+.hint{background:none;border:1px dashed var(--mute);border-radius:99px;padding:6px 12px;font:500 12px var(--mono);color:var(--mute)}
+.hint:disabled{opacity:.4;cursor:default}
+.fb{border-left:4px solid var(--acc);background:var(--soft);padding:10px 12px;border-radius:0 10px 10px 0;margin:14px 0 10px;font-size:15px}
+.fb.miss{border-color:var(--bad)}
+.go{display:block;width:100%;background:var(--acc);color:var(--acc-ink);border:1.5px solid var(--acc);border-radius:12px;padding:13px 16px;font:700 16px var(--body);margin-top:10px;transition:transform .12s}
+.go:hover{transform:translateY(-1px)}
+.go.alt{background:none;color:var(--ink);border-color:var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}
+.chip{background:var(--bg);border:1.5px solid var(--line);border-radius:99px;padding:7px 12px;font-size:14px}
+.chip.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.tog{display:flex;gap:10px;align-items:center;margin:6px 0 4px}
+.tog input{width:20px;height:20px;accent-color:var(--acc)}
+.stage{perspective:1200px;margin:6px 0 14px}
+.fcard{position:relative;height:min(460px,70vh)}
+.inner{position:absolute;inset:0;transition:transform .55s;transform-style:preserve-3d}
+.fcard.flip .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--sf);border:1px solid var(--line);border-top:10px solid var(--cc,var(--acc));border-radius:18px;padding:34px 20px 16px;display:flex;flex-direction:column;gap:12px;overflow:auto}
+.face::before{content:"";position:absolute;top:-1px;left:50%;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--bg);box-shadow:inset 0 0 0 2px var(--line);transform:translateY(-5px)}
+.face.back{transform:rotateY(180deg)}
+.big{font:800 36px/1.1 var(--display);overflow-wrap:anywhere;margin-top:10px}
+.big.sm{font-size:28px}
+.sub{color:var(--mute);font-size:15px}
+.tap{margin-top:auto;font:500 12px var(--mono);color:var(--mute);text-align:center}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 12px;font-size:15px}
+dt{font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);padding-top:3px}
+dd{margin:0}
+.fbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fbtns .go{margin-top:0}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.mcol{display:flex;flex-direction:column;gap:8px;min-width:0}
+.mi{background:var(--sf);border:1.5px solid var(--line);border-left:6px solid var(--cc,var(--line));border-radius:12px;padding:10px;text-align:left;font-size:14px;overflow-wrap:anywhere;min-height:54px;transition:transform .12s}
+.mi.r{border-left-width:1.5px}
+.mi.sel{border-color:var(--acc);box-shadow:0 0 0 3px var(--soft);transform:scale(1.02)}
+.mi.done{background:var(--cc,var(--ok));border-color:var(--cc,var(--ok));color:#fff;opacity:.92;cursor:default}
+.mi.done.r{border-left-width:1.5px}
+.result{text-align:center}
+.ring{width:160px;height:160px;margin:10px auto;display:block}
+.rbg{fill:none;stroke:var(--line);stroke-width:12}
+.rfg{fill:none;stroke:var(--acc);stroke-width:12;stroke-linecap:round;transform:rotate(-90deg);transform-origin:70px 70px;transition:stroke-dashoffset 1s ease-out}
+.rt{font:800 30px var(--display);fill:var(--ink)}
+input[type=search]{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--sf);color:var(--ink);font:16px var(--body);margin:6px 0 10px}
+.sc{overflow-x:auto;background:var(--sf);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:600px}
+table.wide{min-width:880px}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);position:sticky;top:0;background:var(--sf)}
+tr td:first-child{border-left:5px solid var(--cc,transparent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin:6px 0 10px;font:500 12px var(--mono);color:var(--mute)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:4px;display:inline-block}
+.mute{color:var(--mute);font-size:13px}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:20}
+.confetti i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:fall 1.8s ease-in forwards}
+@keyframes fall{to{transform:translate(var(--dx),110vh) rotate(540deg);opacity:.9}}
+@media (max-width:420px){h1{font-size:34px}.stats b{font-size:22px}.qtext{font-size:20px}.big{font-size:30px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.lvl{display:flex;flex-direction:column;gap:6px;margin-top:14px;background:var(--sf);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.lvl-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.lvl-top b{font:800 20px var(--display)}
+.xpbar{height:9px;border-radius:9px;background:var(--line);overflow:hidden}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--k3),var(--acc));border-radius:9px;transition:width .5s}
+.goal{display:flex;justify-content:space-between;font:500 12px var(--mono);color:var(--mute)}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.badge{font:500 12px var(--mono);border:1.5px dashed var(--line);color:var(--mute);border-radius:99px;padding:5px 10px}
+.badge.on{border:1.5px solid var(--k2);color:var(--ink);background:var(--soft)}
+.herb{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:6px}
+.spec{border:1.5px dashed var(--line);border-radius:10px;min-height:46px;padding:6px;font:500 11px/1.2 var(--mono);color:var(--mute);display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;overflow-wrap:anywhere}
+.spec.got{border:0;background:var(--cc);color:#fff}
+.hearts{display:flex;gap:4px;align-items:center}
+.heart{width:22px;height:22px;color:var(--bad);transition:transform .2s,opacity .2s}
+.heart.lost{opacity:.25;transform:scale(.8)}
+.combo{font:500 13px var(--mono);color:var(--mute)}
+.combo b{font:800 18px var(--display);color:var(--ink)}
+.combo.hot b{color:var(--k2)}
+.xppop{position:fixed;left:50%;bottom:16%;transform:translateX(-50%);font:800 22px var(--display);color:var(--acc);pointer-events:none;z-index:30;animation:rise 1s ease-out forwards}
+@keyframes rise{to{transform:translate(-50%,-70px);opacity:0}}
+.toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);font:700 15px var(--display);padding:10px 16px;border-radius:99px;z-index:30;animation:drop .35s}
+@keyframes drop{from{transform:translate(-50%,-30px);opacity:0}}
+.stars{font:800 34px var(--display);color:var(--k2);letter-spacing:6px}
+.go:disabled{opacity:.4;cursor:default;transform:none}
+.ans{width:100%;padding:12px;border:2px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:18px var(--body)}
+.ans.right{border-color:var(--ok);background:var(--soft)}
+#verdict .fb{margin:4px 0 8px}
+#fact .go:first-child{margin-top:0}
 </style>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@700&display=swap">
 </head>
 <body>
 <main id="app"></main>
@@ -186,51 +304,228 @@ const SETS={
 list:{name:"Crude drug list",rows:L,T:T4,M:M4,fb:fb4,hd:hd4,row:row4,txt:txt4,intro:"55 drugs: synonyms, biological source, family, constituent, class and use. Entries marked added are not from your class notes, so check them against your syllabus."},
 aids:{name:"Pharmaceutical aids",rows:A,T:T2,M:M2,fb:fb2,hd:hd2,row:row2,txt:txt2,intro:"Enzymes, lipids, fibres, gums and bee products from the class notes: sources, families and regions."},
 cases:{name:"Crude drug casebook",rows:C,T:T3,M:M3,fb:fb3,hd:hd3,row:row3,txt:txt3,intro:"The Pharmacognosy I casebook as quick questions. Read the clues, name the drug, then check the case file."}};
-let setK="list",tabK="study";
-
-const app=document.getElementById("app"),sh=a=>[...a].sort(()=>Math.random()-.5);
-let q,qi,score,locked;
+/* ================= Game UI ================= */
+const $=s=>document.querySelector(s),app=document.getElementById("app");
+const sh=a=>[...a].sort(()=>Math.random()-.5);
+const RM=!!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches);
+const KEY="plantidquiz-demo-v2";
+let st={xp:0,answered:0,correct:0,bestStreak:0,bestCombo:0,perfect:0,quizzes:0,day:"",today:0,known:{},weak:{},best:{}};
+try{const r=localStorage.getItem(KEY);if(r)st=Object.assign(st,JSON.parse(r))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+let setK="list",q=[],qi=0,streak=0,bestRun=0,hints=3,locked=false,timerOn=false,qType="mix",tmr=null,fc=null,mt=null,view="home";
 const S=()=>SETS[setK];
+const mapOf=(o,k)=>(o[k]=o[k]||{});
+const clearT=()=>{if(tmr){clearInterval(tmr);tmr=null}};
+const show=h=>{clearT();app.innerHTML=h;try{window.scrollTo(0,0)}catch(e){}};
+const back=()=>`<button class="bk" data-a="home">&larr; Home</button>`;
+const col=d=>`style="--cc:var(--k${cat(d)})"`;
+const TITLES=["Seedling","Sprout","Gardener","Herbalist","Pharmacognosist","Chief Botanist"];
+const lvl=xp=>Math.floor(Math.sqrt(xp/50))+1;
+const GOAL=20;
+const HEART='<svg class="heart" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.4C.9 8 3 4.5 6.5 4.5c2 0 3.6 1 5.5 3 1.9-2 3.5-3 5.5-3C21 4.5 23.1 8 21.6 11.6 19.5 16.4 12 21 12 21z"/></svg>';
+const LEAF='<svg viewBox="0 0 120 120" width="72" height="72" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M20 100C20 50 60 18 104 16c2 44-26 82-72 82"/><path d="M20 100L86 34M52 72l-2-22M66 58l18 4M40 86l-14-2M52 72l16 6"/></svg>';
 
-function home(tab,set){
-if(set)setK=set;tabK=tab||tabK;
-app.innerHTML=`<h1>Plant ID Quiz</h1><div class="mute">${S().intro}</div>
-<div class="row sets">${Object.keys(SETS).map(k=>`<button class="${k==setK?'on':''}" onclick="home('${tabK}','${k}')">${SETS[k].name}</button>`).join("")}</div>
-<div class="row seg"><button class="${tabK=='quiz'?'':'on'}" onclick="home('study')">Study cards</button><button class="${tabK=='quiz'?'on':''}" onclick="home('quiz')">Quiz</button></div><div id="v"></div>`;
-if(tabK=='quiz')menu();else study()}
+/* colour = chemical class */
+function cat(d){
+ if(setK==="aids"){const c=d[5];return c==="Protein"||c==="Enzyme"?7:c==="Lipid"?5:c==="Fibre"?4:c==="Gum"?2:3}
+ if(setK==="cases")return ((d[1]-1)%8)+1;
+ const c=(d[6]||"").toLowerCase();
+ if(c.includes("alkaloid"))return 1;
+ if(c.includes("glycoside"))return 2;
+ if(/volatile|terpene alcohol|aldehyde|phenolic|phenylprop/.test(c))return 3;
+ if(c.includes("tannin"))return 4;
+ if(/resin acid|oleo|balsam/.test(c))return 5;
+ if(/saponin|steroid|sapogenin|lactone|terpenoid|diterpene|furocoumarin|quinone|cannabinoid|polyphenol|stilbene|terpene/.test(c))return 6;
+ if(c.includes("inorganic"))return 8;
+ return 7}
+const LEG=[[1,"Alkaloid"],[2,"Glycoside"],[3,"Volatile oil"],[4,"Tannin"],[5,"Resin or gum"],[6,"Terpenoid or steroid"],[7,"Other"],[8,"Inorganic"]];
 
-function study(){document.getElementById("v").innerHTML=`<div class="card"><input id="f" placeholder="Search the table" aria-label="Search the table" oninput="tbl()"><div class="sc" id="t"></div></div>`;tbl()}
-function tbl(){const s=(document.getElementById("f").value||"").toLowerCase(),c=S();
-document.getElementById("t").innerHTML=`<table class="${c.hd.length>4?"wide":""}"><tr>`+c.hd.map(h=>`<th>${h}</th>`).join("")+"</tr>"+c.rows.filter(d=>c.txt(d).toLowerCase().includes(s)).map(d=>"<tr>"+c.row(d).map(x=>`<td>${x}</td>`).join("")+"</tr>").join("")+"</table>"}
+/* XP, levels, day goal */
+function dayTick(){const t=new Date().toDateString();if(st.day!==t){st.day=t;st.today=0}st.today++}
+function pop(t){const e=document.createElement("div");e.className="xppop";e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1000)}
+function toast(t){const e=document.createElement("div");e.className="toast";e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2600)}
+function gain(n){const l0=lvl(st.xp);st.xp+=n;pop("+"+n+" XP");const l1=lvl(st.xp);if(l1>l0){toast("Level "+l1+": "+TITLES[Math.min(l1-1,5)]);confetti()}save()}
+function confetti(){if(RM)return;const w=document.createElement("div");w.className="confetti";for(let i=0;i<30;i++){const s=document.createElement("i");s.style.cssText=`left:${Math.random()*100}%;background:var(--k${1+i%6});animation-delay:${Math.random()*.4}s;--dx:${(Math.random()-.5)*180}px`;w.appendChild(s)}document.body.appendChild(w);setTimeout(()=>w.remove(),2400)}
 
-function menu(){tabK='quiz';document.getElementById("v").innerHTML=`<div class="card"><p>Pick a quiz (10 questions each):</p>`+
-S().M.map(m=>`<button class="opt" onclick="go('${m[0]}')">${m[1].replace("→","&rarr;")}</button>`).join("")+
-`<button class="opt p" onclick="go('mix')">Mixed (all types)</button></div>`}
+/* ---------- Home ---------- */
+function home(){view="home";
+ const c=S(),total=c.rows.length,kn=mapOf(st.known,setK),knN=Object.keys(kn).length,wk=Object.keys(mapOf(st.weak,setK)).length;
+ const l=lvl(st.xp),cur=50*(l-1)*(l-1),nxt=50*l*l,pct=Math.round((st.xp-cur)/(nxt-cur)*100);
+ const t=new Date().toDateString(),today=st.day===t?st.today:0,acc=st.answered?Math.round(st.correct/st.answered*100):0;
+ const known=Object.values(st.known).reduce((a,o)=>a+Object.keys(o).length,0);
+ const badges=[["First specimen",known>=1],["10 collected",known>=10],["Combo x5",st.bestCombo>=5],["Quiz streak 8",st.bestStreak>=8],["Perfect hunt",st.perfect>=1],["Level 3",l>=3],["Daily goal",today>=GOAL]];
+ const modes=[["flash","Specimen Hunt","Flashcard game: type the answer in 30 seconds or the card flips. 3 hearts, combos and XP.","Game"],["quiz","Quiz","10 questions, 50:50 hints, streaks and a timer option","Test"]];
+ modes.push(["match","Match pairs","Pick a category such as chemical class or family, then pair 5 at a time.","Play"]);
+ modes.push(["table","Study table","Searchable and colour coded by chemical class","Read"]);
+ if(wk)modes.push(["weak","Review missed",wk+" to fix. Each one you win back earns XP","Fix"]);
+ show(`<header class="top"><div><div class="lab">Pharmacognosy I</div><h1>Plant ID Quiz</h1></div><div class="leaf">${LEAF}</div></header>
+<section class="lvl"><div class="lvl-top"><b>Level ${l}: ${TITLES[Math.min(l-1,5)]}</b><span class="lab">${st.xp} XP</span></div><div class="xpbar"><i style="width:${pct}%"></i></div><div class="goal"><span>Daily goal ${Math.min(today,GOAL)} / ${GOAL} cards</span><span>Accuracy ${acc}%</span></div></section>
+<h2 class="sec">Choose a set</h2><div class="tiles">${Object.keys(SETS).map(k=>{const r=SETS[k].rows.length,n=Object.keys(mapOf(st.known,k)).length;return `<button class="tile${k===setK?' on':''}" data-a="set" data-k="${k}"><span class="tn">${SETS[k].name}</span><span class="tc">${n} / ${r} collected</span><span class="pbar"><i style="width:${Math.round(n/r*100)}%"></i></span></button>`}).join("")}</div>
+<p class="intro">${c.intro}</p>
+<h2 class="sec">Pick a mode</h2><div class="modes">${modes.map(m=>`<button class="mode" data-a="mode" data-m="${m[0]}"><span class="lab">${m[3]}</span><span class="mt">${m[1]}</span><span class="md">${m[2]}</span></button>`).join("")}</div>
+<h2 class="sec">Herbarium: ${knN} / ${total} collected</h2><div class="herb">${c.rows.map(d=>kn[d[0]]?`<div class="spec got" ${col(d)}>${d[0]}</div>`:`<div class="spec">?</div>`).join("")}</div>
+<h2 class="sec">Badges</h2><div class="badges">${badges.map(b=>`<span class="badge${b[1]?' on':''}">${b[0]}</span>`).join("")}</div>`)}
 
-function go(m){const c=S(),T=c.T,ks=Object.keys(T);
-const pool0=m=='mix'?c.rows:c.rows.filter(T[m][2]);
-q=sh(pool0).slice(0,10).map(d=>{
-const avail=ks.filter(k=>T[k][2](d));const t=m=='mix'?avail[Math.floor(Math.random()*avail.length)]:m;
-const row=Object.assign([...d],{});
-if(Array.isArray(d[1])&&d[1].length)row.syn=d[1][Math.floor(Math.random()*d[1].length)];
-if(setK=='cases'){const nmk=d[0].toLowerCase().split(" ")[0];const cl=d[2].filter(x=>!x[1].toLowerCase().includes(nmk));row.clue=sh(cl).slice(0,2).map(x=>x[1]).join(" ")}
-const fo=T[t][3];
-if(fo){const r=fo(d);return{d:row,t,a:r.a,o:sh(r.o)}}
-const f=T[t][1],a=f(d);
-const pool=sh(c.rows.filter(x=>x!==d&&f(x)&&f(x)!==a&&(!T[t][4]||pre(f(x))!==pre(a))));const ops=[];
-for(const x of pool){if(!ops.includes(f(x)))ops.push(f(x));if(ops.length==3)break}
-return{d:row,t,a,o:sh([a,...ops])}});qi=0;score=0;show()}
+/* ---------- Quiz engine ---------- */
+function genQ(m,rows){const c=S(),T=c.T,ks=Object.keys(T);
+ const pool0=m==="mix"?rows:rows.filter(T[m][2]);
+ return sh(pool0).slice(0,10).map(d=>{
+  const avail=ks.filter(k=>T[k][2](d));const t=m==="mix"?avail[Math.floor(Math.random()*avail.length)]:m;
+  const row=Object.assign([...d],{});
+  if(Array.isArray(d[1])&&d[1].length)row.syn=d[1][Math.floor(Math.random()*d[1].length)];
+  if(setK==="cases"){const k=d[0].toLowerCase().split(" ")[0];row.clue=sh(d[2].filter(x=>!x[1].toLowerCase().includes(k))).slice(0,2).map(x=>x[1]).join(" ")}
+  const fo=T[t][3];if(fo){const r=fo(d);return{d:row,t,a:r.a,o:sh(r.o)}}
+  const f=T[t][1],a=f(d);
+  const pool=sh(c.rows.filter(x=>x!==d&&f(x)&&f(x)!==a&&(!T[t][4]||pre(f(x))!==pre(a))));const ops=[];
+  for(const x of pool){if(!ops.includes(f(x)))ops.push(f(x));if(ops.length==3)break}
+  return{d:row,t,a,o:sh([a,...ops])}})}
+function setup(){view="setup";const c=S();
+ show(`${back()}<h1 class="h2">Quiz setup</h1><div class="card"><div class="lab">Question type</div><div class="chips">${[["mix","Mixed"],...c.M].map(m=>`<button class="chip${qType===m[0]?' on':''}" data-a="qt" data-t="${m[0]}">${m[1].replace("→","&rarr;")}</button>`).join("")}</div><label class="tog"><input type="checkbox" id="tm" ${timerOn?"checked":""}><span>Timer: 20 seconds per question</span></label><button class="go" data-a="start">Start quiz</button></div>`)}
+function startQuiz(rows){q=genQ(qType,rows||S().rows);if(!q.length){home();return}qi=0;streak=0;bestRun=0;hints=3;renderQ()}
+function renderQ(){view="quiz";locked=false;const c=S(),x=q[qi];
+ const dots=q.map((y,i)=>`<i class="${y.res===1?'ok':y.res===0?'bad':i===qi?'cur':''}"></i>`).join("");
+ const lab=(c.M.find(m=>m[0]===x.t)||[0,""])[1].replace("→","&rarr;");
+ show(`<div class="qtop">${back()}<div class="streak" id="stk">Streak <b>${streak}</b></div></div><div class="dots">${dots}</div><div class="qcard" ${col(x.d)}><div class="lab">Question ${qi+1} of ${q.length} &middot; ${lab}</div>${timerOn?'<div class="tbar"><i id="tb"></i></div>':''}<div class="qtext">${c.T[x.t][0](x.d)}</div><div id="opts">${x.o.map((o,k)=>`<button class="opt" data-a="pick" data-k="${k}"><span class="key">${"ABCD"[k]}</span><span class="ot">${o}</span></button>`).join("")}</div><div class="qfoot"><button class="hint" id="hb" data-a="hint" ${hints?"":"disabled"}>50:50 hint (${hints} left)</button></div><div id="fb"></div></div>`);
+ if(timerOn){const T0=Date.now(),b=$("#tb");tmr=setInterval(()=>{const p=Math.min(1,(Date.now()-T0)/20000);if(b)b.style.width=(100-p*100)+"%";if(p>=1){clearT();if(!locked)reveal(-1)}},100)}}
+function reveal(k){locked=true;clearT();const x=q[qi],c=S();
+ const right=k>=0&&x.o[k]===x.a;x.res=right?1:0;
+ document.querySelectorAll(".opt").forEach((e,j)=>{e.disabled=true;if(x.o[j]===x.a)e.classList.add("ok");else if(j===k)e.classList.add("bad")});
+ dayTick();st.answered++;const w=mapOf(st.weak,setK),name=x.d[0],stk=$("#stk");
+ if(right){st.correct++;streak++;bestRun=Math.max(bestRun,streak);st.bestStreak=Math.max(st.bestStreak,streak);if(w[name]){w[name]>1?w[name]--:delete w[name]}gain(10+Math.min(streak,5)*2);stk.classList.add("bump");if(streak>=3)stk.classList.add("hot")}
+ else{streak=0;w[name]=(w[name]||0)+1;stk.classList.remove("hot");save()}
+ stk.innerHTML=`Streak <b>${streak}</b>`;
+ const hb=$("#hb");if(hb)hb.disabled=true;
+ $("#fb").innerHTML=`<div class="fb ${right?'':'miss'}"><b>${k<0?"Time is up.":right?"Correct.":"Not quite."}</b> ${c.fb(x.d)}</div><button class="go" data-a="next">${qi<q.length-1?"Next question":"See result"}</button>`;
+ document.querySelector(".dots").children[qi].className=right?"ok":"bad"}
+function finish(){clearT();view="result";st.quizzes++;const n=q.length,s=q.filter(x=>x.res===1).length,p=Math.round(s/n*100),b=mapOf(st.best,setK);b.pct=Math.max(b.pct||0,p);
+ const miss=q.filter(x=>x.res!==1).length;if(s===n){st.perfect++;gain(25)}else save();
+ const R=54,C=2*Math.PI*R,msg=p>=90?"Outstanding recall.":p>=70?"Solid work. A little more revision.":p>=40?"Getting there. Retry the missed ones.":"Start with Specimen Hunt, then try again.";
+ show(`<div class="result"><svg class="ring" viewBox="0 0 140 140" role="img" aria-label="${p} percent"><circle cx="70" cy="70" r="${R}" class="rbg"/><circle cx="70" cy="70" r="${R}" class="rfg" id="rf" stroke-dasharray="${C}" stroke-dashoffset="${C}"/><text x="70" y="77" text-anchor="middle" class="rt">${s}/${n}</text></svg><h1 class="h2">${msg}</h1><p class="intro">Best streak this round: ${bestRun}. Best score on this set: ${b.pct}%.</p><div>${miss?`<button class="go" data-a="retry">Retry ${miss} missed</button>`:""}<button class="go alt" data-a="setup">New quiz</button><button class="go alt" data-a="home">Home</button></div></div>`);
+ setTimeout(()=>{const f=$("#rf");if(f)f.style.strokeDashoffset=C*(1-p/100)},60);if(p>=80)confetti()}
 
-function show(){locked=false;const c=S();
-if(qi>=q.length){const m=score>=9?"Excellent, you know your drugs!":score>=6?"Good work, keep revising.":"Review the study cards and try again.";
-document.getElementById("v").innerHTML=`<div class="card"><h2>${score} / ${q.length}</h2><p>${m}</p><div class="row"><button class="p" onclick="menu()">Another quiz</button><button onclick="home('study')">Study cards</button></div></div>`;return}
-const x=q[qi];document.getElementById("v").innerHTML=`<div class="card"><div class="bar"><span>Question ${qi+1} of ${q.length}</span><span>Score ${score}</span></div><div class="q">${c.T[x.t][0](x.d)}</div>`+x.o.map((o,k)=>`<button class="opt" onclick="pick(${k})">${o}</button>`).join("")+`<div id="fb"></div></div>`}
+/* ---------- Specimen Hunt (typed flashcard game) ---------- */
+const kv=a=>`<dl>${a.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join("")}</dl>`;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const FACE={
+ list:{lab:"Drug",front:d=>`<div class="big">${d[0]}</div>${d[1].length?`<div class="sub">Also called: ${d[1].join(", ")}</div>`:""}`,back:d=>kv([["Source",d[2]],["Family",d[3]||"&ndash;"],["Constituent",d[5]],["Class",d[6]],["Use",d[7]]])},
+ aids:{lab:"Substance",front:d=>`<div class="big">${d[0]}</div>${d[1].length?`<div class="sub">Also called: ${d[1].join(", ")}</div>`:""}`,back:d=>kv([["Source",d[2]],["Family",d[3]||"&ndash;"],["Region",d[4]||"&ndash;"],["Category",d[5]]])},
+ cases:{lab:"Case clues",front:d=>`<div class="sub">${d[2].slice(0,2).map(c=>`<b>${c[0]}:</b> ${c[1]}`).join("<br><br>")}</div>`,back:d=>`<div class="big sm">${d[0]}</div><div class="sub">${d[5]}</div>`}};
+/* what the student types, per set: [label, prompt text, getter] */
+const ASK={
+ list:[["Family","family",d=>d[3]],["Biological source","biological source",d=>d[2]],["Chemical constituent","chemical constituent",d=>d[5]]],
+ aids:[["Family","family",d=>d[3]],["Biological source","biological source",d=>d[2]],["Region","geographical source",d=>d[4]]],
+ cases:[["Name","drug or method",d=>d[0]]]};
+/* answer checking: forgiving about case, punctuation, small typos and alternative names */
+const norm=s=>String(s).toLowerCase().replace(/&/g," and ").replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim();
+const ALIAS={leguminosae:["fabaceae"],umbelliferae:["apiaceae"],cannabinaceae:["cannabaceae"],asteraceae:["compositae"],arecaceae:["palmae"],lamiaceae:["labiatae"],liliaceae:["asparagaceae"],atropine:["hyoscyamine"],caffeine:["theine"]};
+function variants(s,o){const out=new Set(),add=v=>{v=norm(v);if(v.length>=3)out.add(v)};
+ add(s);const plain=s.replace(/\([^)]*\)/g," ");add(plain);(s.match(/\(([^)]*)\)/g)||[]).forEach(m=>add(m.slice(1,-1)));
+ plain.split(/\s*(?:\/|;|,|\band\b|&)\s*/).forEach(add);
+ if(o.first)add(norm(plain).split(" ")[0]);
+ if(o.species)[...out].forEach(v=>{const w=v.split(" ");if(w.length===2&&w[1].length>=5)out.add(w[1])});
+ [...out].forEach(v=>(ALIAS[v]||[]).forEach(a=>out.add(a)));return [...out]}
+function lev(a,b){const m=a.length,n=b.length,d=[];for(let i=0;i<=m;i++)d[i]=[i];for(let j=1;j<=n;j++)d[0][j]=j;
+ for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n]}
+function isRight(typed,ans,o){const t=norm(typed);if(!t)return false;return variants(ans,o).some(v=>lev(t,v)<=(v.length<=4?0:v.length<=9?1:2))}
+const SECS=30;
+function startFlash(rows){const all=rows||S().rows,kn=mapOf(st.known,setK);
+ const fresh=sh(all.filter(d=>!kn[d[0]])),seen=sh(all.filter(d=>kn[d[0]]));
+ fc={deck:sh([...fresh,...seen].slice(0,12)),i:0,got:0,combo:0,best:0,hearts:3,lost:0,miss:[],cur:null};renderFlash()}
+const hearts=n=>`<div class="hearts" aria-label="${n} hearts left">${[0,1,2].map(i=>HEART.replace('class="heart"',`class="heart${i<n?'':' lost'}"`)).join("")}</div>`;
+function renderFlash(){view="flash";
+ if(fc.hearts<=0)return flashEnd(false);
+ if(fc.i>=fc.deck.length)return flashEnd(true);
+ const d=fc.deck[fc.i],F=FACE[setK],opts=ASK[setK].filter(a=>a[2](d)),ask=opts[Math.floor(Math.random()*opts.length)];
+ fc.cur={d,ask,ans:ask[2](d),done:false,flipped:false};
+ show(`<div class="qtop">${back()}${hearts(fc.hearts)}<div class="combo ${fc.combo>=3?'hot':''}" id="cmb">Combo <b>x${fc.combo}</b></div></div><div class="dots">${fc.deck.map((y,i)=>`<i class="${i<fc.i?'ok':i===fc.i?'cur':''}"></i>`).join("")}</div><div class="lab">Specimen ${fc.i+1} of ${fc.deck.length} &middot; <b id="tsec">${SECS}s</b></div><div class="tbar" ${col(d)}><i id="tb"></i></div><div class="stage"><div class="fcard" id="fcd" ${col(d)}><div class="inner"><div class="face"><span class="lab">${F.lab}</span>${F.front(d)}<label class="lab" for="ans">Type the ${ask[1]}</label><input id="ans" class="ans" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Your answer" aria-label="Your answer"></div><div class="face back"><span class="lab">${d[0]}</span><div id="verdict"></div>${F.back(d)}</div></div></div></div><div id="fact"><button class="go" data-a="fcheck">Check answer</button><button class="go alt" data-a="freveal">Show answer</button></div>`);
+ const T0=Date.now(),b=$("#tb"),n=$("#tsec");fc.t0=T0;
+ tmr=setInterval(()=>{const left=SECS*1000-(Date.now()-T0);if(b)b.style.width=Math.max(0,left/(SECS*10))+"%";if(n)n.textContent=Math.max(0,Math.ceil(left/1000))+"s";if(left<=0){clearT();flashMiss("time")}},100);
+ setTimeout(()=>{const a=$("#ans");if(a&&a.focus)a.focus()},60)}
+function flashCheck(){const c=fc&&fc.cur;if(!c||c.done)return;const a=$("#ans"),v=(a.value||"").trim();if(!v){if(a.focus)a.focus();return}
+ isRight(v,c.ans,{first:setK==="cases",species:c.ask[0]==="Biological source"})?flashWin():flashMiss("wrong",v)}
+function flashWin(){const c=fc.cur,d=c.d;c.done=true;clearT();const left=SECS*1000-(Date.now()-fc.t0);
+ const kn=mapOf(st.known,setK),w=mapOf(st.weak,setK);kn[d[0]]=1;if(w[d[0]]){w[d[0]]>1?w[d[0]]--:delete w[d[0]]}
+ fc.got++;fc.combo++;fc.best=Math.max(fc.best,fc.combo);st.bestCombo=Math.max(st.bestCombo,fc.combo);dayTick();
+ gain(10+Math.min(fc.combo,5)*2+(left>SECS*500?5:0));
+ const a=$("#ans");a.classList.add("right");a.disabled=true;$("#cmb").innerHTML=`Combo <b>x${fc.combo}</b>`;
+ const btns=$("#fact");if(btns)btns.innerHTML="";
+ setTimeout(()=>{if(fc&&fc.cur===c)flashNext()},700)}
+function flashMiss(why,typed){const c=fc&&fc.cur;if(!c||c.done)return;c.done=true;c.flipped=true;clearT();const d=c.d;
+ const kn=mapOf(st.known,setK),w=mapOf(st.weak,setK);delete kn[d[0]];w[d[0]]=(w[d[0]]||0)+1;
+ fc.combo=0;fc.hearts--;fc.lost++;fc.miss.push(d);dayTick();save();
+ $("#fcd").classList.add("flip");
+ $("#verdict").innerHTML=`<div class="fb miss"><b>${why==="time"?"Time is up.":why==="wrong"?"Not quite.":"Answer revealed."}</b> ${typed?`You typed <b>${esc(typed)}</b>. `:""}Answer: <b>${esc(c.ans)}</b></div>`;
+ const h=document.querySelector(".hearts");if(h)h.outerHTML=hearts(fc.hearts);
+ const cb=$("#cmb");if(cb)cb.innerHTML=`Combo <b>x0</b>`;
+ $("#fact").innerHTML=`<button class="go" data-a="fnext">${fc.hearts<=0?"See result":"Next specimen"}</button>`}
+function flashNext(){fc.i++;renderFlash()}
+function flashEnd(win){view="flashend";clearT();const n=fc.deck.length,stars=win?(fc.lost===0?3:fc.lost===1?2:1):0;
+ if(win){if(fc.lost===0){st.perfect++;gain(30)}else gain(15);confetti()}save();
+ show(`<div class="result"><div class="stars" aria-label="${stars} stars">${"&#9733;".repeat(stars)}${"&#9734;".repeat(3-stars)}</div><h1 class="h2">${win?"Hunt complete!":"Out of hearts"}</h1><p class="intro">${win?`Collected ${fc.got} of ${n} specimens. Best combo: x${fc.best}.`:`You collected ${fc.got} specimens before the hearts ran out. Study the back of the cards, then try again.`}</p><div>${fc.miss.length?`<button class="go" data-a="fretry">Hunt the ${fc.miss.length} missed</button>`:""}<button class="go ${fc.miss.length?'alt':''}" data-a="fagain">New hunt</button><button class="go alt" data-a="home">Home</button></div></div>`)}
 
-function pick(k){if(locked)return;locked=true;const x=q[qi],b=document.querySelectorAll(".opt");
-b.forEach((e,j)=>{if(x.o[j]==x.a)e.classList.add("ok");else if(j==k)e.classList.add("bad")});
-const right=x.o[k]==x.a;if(right)score++;
-document.getElementById("fb").innerHTML=`<div class="fb"><b>${right?"Correct!":"Not quite."}</b> ${S().fb(x.d)}</div><button class="p" onclick="qi++;show()">${qi<q.length-1?"Next":"See score"}</button>`}
-home('study');
+/* ---------- Match pairs (one category per round) ---------- */
+const syn=d=>Array.isArray(d[1])&&d[1].length?d[1][Math.floor(Math.random()*d[1].length)]:"";
+const MC={
+ list:[["Family","Pair each drug with its plant family",d=>d[3]],["Biological source","Pair each drug with its botanical name",d=>d[2]],["Chemical constituent","Pair each drug with its main constituent",d=>d[5]],["Chemical class","Pair each drug with the class of its constituent",d=>d[6]],["Use","Pair each drug with what it is used for",d=>d[7]],["Synonym","Pair each drug with another name for it",syn]],
+ aids:[["Family","Pair each substance with its plant or animal family",d=>d[3]],["Biological source","Pair each substance with its source organism",d=>d[2]],["Type","Pair each substance with its type",d=>d[5]],["Synonym","Pair each substance with another name for it",syn]],
+ cases:[["Opening clue","Pair each case drug with its first clue",d=>d[2][0][1]]]};
+function matchSel(){view="matchsel";clearT();mt=null;
+ show(`${back()}<h1 class="h2">Match pairs</h1><p class="intro">Choose a category. Every round uses only that category, with 5 new pairs each time, so you can keep going.</p><div class="modes">${MC[setK].map((m,i)=>`<button class="mode" data-a="mcat" data-i="${i}"><span class="lab">Category</span><span class="mt">${m[0]}</span><span class="md">${m[1]}</span></button>`).join("")}</div>`)}
+function startMatch(i){mt={cat:MC[setK][i],used:new Set(),round:0,xp:0};matchRound()}
+function matchRound(){const c=S(),cat=mt.cat;let pick=null;
+ for(let tries=0;tries<2&&!pick;tries++){const seen=new Set(),rows=[];
+  for(const d of sh(c.rows)){if(tries===0&&mt.used.has(d[0]))continue;const v=cat[2](d);if(v&&!seen.has(pre(v))){seen.add(pre(v));rows.push({d,v})}if(rows.length===5)break}
+  if(rows.length===5)pick=rows;else mt.used.clear()}
+ if(!pick){toast("Not enough distinct pairs in this category");return matchSel()}
+ pick.forEach(x=>mt.used.add(x.d[0]));mt.round++;
+ mt.items=pick.map((x,i)=>({i,d:x.d,v:x.v}));mt.l=mt.r=null;mt.done=0;mt.miss=0;mt.t0=Date.now();renderMatch()}
+function renderMatch(){view="match";const L=sh(mt.items),R=sh(mt.items);
+ show(`<div class="qtop">${back()}<div class="lab">Time <b id="mtime">0s</b> &middot; Mistakes <b id="mmiss">0</b></div></div><div class="lab">${mt.cat[0]} &middot; Round ${mt.round}</div><h1 class="h2">${mt.cat[1]}</h1><div class="mgrid"><div class="mcol">${L.map(x=>`<button class="mi" data-a="ml" data-i="${x.i}" ${col(x.d)}>${x.d[0]}</button>`).join("")}</div><div class="mcol">${R.map(x=>`<button class="mi r" data-a="mr" data-i="${x.i}">${x.v}</button>`).join("")}</div></div><div id="mres"></div>`);
+ tmr=setInterval(()=>{const e=$("#mtime");if(e)e.textContent=Math.round((Date.now()-mt.t0)/1000)+"s"},500)}
+function msel(side,i,b){if(b.classList.contains("done"))return;
+ document.querySelectorAll(`.mi[data-a=m${side}]`).forEach(e=>e.classList.remove("sel"));b.classList.add("sel");mt[side]=i;
+ if(mt.l!==null&&mt.r!==null){const l=mt.l,r=mt.r,lb=$(`.mi[data-a=ml][data-i="${l}"]`),rb=$(`.mi[data-a=mr][data-i="${r}"]`);mt.l=mt.r=null;
+  if(l===r){[lb,rb].forEach(e=>{e.classList.remove("sel");e.classList.add("done");e.disabled=true});rb.style.setProperty("--cc",lb.style.getPropertyValue("--cc"));mt.done++;if(mt.done===5)endMatch()}
+  else{mt.miss++;$("#mmiss").textContent=mt.miss;[lb,rb].forEach(e=>e.classList.add("shake"));setTimeout(()=>[lb,rb].forEach(e=>e.classList.remove("shake","sel")),420)}}}
+function endMatch(){clearT();const secs=Math.round((Date.now()-mt.t0)/1000),xp=Math.max(10,30-mt.miss*4);mt.xp+=xp;gain(xp);if(mt.miss<=1)confetti();
+ $("#mres").innerHTML=`<div class="fb"><b>Round ${mt.round} done in ${secs}s with ${mt.miss} mistake${mt.miss===1?"":"s"}.</b> You earned ${xp} XP (${mt.xp} this session).</div><button class="go" data-a="mnext">Next round</button><button class="go alt" data-a="match">Change category</button><button class="go alt" data-a="home">Home</button>`}
+
+/* ---------- Study table ---------- */
+function tableView(){view="table";const c=S();
+ show(`${back()}<h1 class="h2">${c.name}</h1>${setK==="list"?`<div class="legend">${LEG.map(l=>`<span><i style="background:var(--k${l[0]})"></i>${l[1]}</span>`).join("")}</div>`:""}<input id="f" type="search" placeholder="Search the table" aria-label="Search the table"><div class="sc" id="t"></div>`);tbl()}
+function tbl(){const s=($("#f").value||"").toLowerCase(),c=S();
+ $("#t").innerHTML=`<table class="${c.hd.length>4?"wide":""}"><tr>`+c.hd.map(h=>`<th>${h}</th>`).join("")+"</tr>"+c.rows.filter(d=>c.txt(d).toLowerCase().includes(s)).map(d=>`<tr ${col(d)}>`+c.row(d).map(x=>`<td>${x}</td>`).join("")+"</tr>").join("")+"</table>"}
+
+/* ---------- Actions ---------- */
+const weakRows=()=>{const w=mapOf(st.weak,setK);return S().rows.filter(d=>w[d[0]])};
+const ACT={
+ home,
+ set:d=>{setK=d.k;qType="mix";home()},
+ mode:d=>{const m=d.m;if(m==="flash")startFlash();else if(m==="quiz")setup();else if(m==="match")matchSel();else if(m==="table")tableView();else if(m==="weak"){qType="mix";startQuiz(weakRows())}},
+ qt:d=>{const t=$("#tm");if(t)timerOn=t.checked;qType=d.t;setup()},
+ start:()=>{timerOn=$("#tm").checked;startQuiz()},
+ pick:d=>{if(locked)return;clearT();reveal(+d.k)},
+ hint:()=>{const x=q[qi];if(locked||hints<=0||x.hinted)return;x.hinted=true;
+  const wrong=[...document.querySelectorAll(".opt")].filter((e,j)=>x.o[j]!==x.a);
+  sh(wrong).slice(0,2).forEach(e=>{e.classList.add("gone");e.disabled=true});hints--;const h=$("#hb");h.textContent=`50:50 hint (${hints} left)`;h.disabled=true},
+ next:()=>{qi++;qi>=q.length?finish():renderQ()},
+ retry:()=>{q=q.filter(x=>x.res!==1).map(x=>({d:x.d,t:x.t,a:x.a,o:sh(x.o)}));qi=0;streak=0;bestRun=0;hints=3;renderQ()},
+ fcheck:()=>flashCheck(),
+ freveal:()=>flashMiss("shown"),
+ fnext:()=>{if(fc&&fc.cur&&fc.cur.flipped)flashNext()},
+ fretry:()=>{startFlash(fc.miss)},
+ fagain:()=>startFlash(),
+ ml:(d,b)=>msel("l",+d.i,b),mr:(d,b)=>msel("r",+d.i,b),
+ match:()=>matchSel(),mcat:d=>startMatch(+d.i),mnext:()=>matchRound()
+};
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(!b||b.disabled)return;const f=ACT[b.dataset.a];if(f)f(b.dataset,b)});
+document.addEventListener("input",e=>{if(e.target.id==="f")tbl()});
+document.addEventListener("keydown",e=>{
+ if(e.target.id==="ans"){if(e.key==="Enter"){e.preventDefault();ACT.fcheck()}return}
+ if(e.target.tagName==="INPUT")return;
+ if(view==="quiz"){const k="1234".indexOf(e.key);if(k>=0&&!locked&&q[qi]&&k<q[qi].o.length)ACT.pick({k});else if((e.key==="ArrowRight"||e.key==="n")&&locked)ACT.next()}
+ else if(view==="flash"&&fc&&fc.cur&&fc.cur.flipped&&e.key==="Enter"&&e.target===document.body)ACT.fnext()});
+home();
 </script>
 </body>
 </html>
