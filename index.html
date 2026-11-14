@@ -155,6 +155,12 @@ tr td:first-child{border-left:5px solid var(--cc,transparent)}
 .ans.right{border-color:var(--ok);background:var(--soft)}
 #verdict .fb{margin:4px 0 8px}
 #fact .go:first-child{margin-top:0}
+.links{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.link{display:flex;flex-direction:column;justify-content:space-between;gap:10px;background:var(--sf);border:1px solid var(--line);border-left:6px solid var(--k6);border-radius:14px;padding:14px;color:var(--ink);text-decoration:none;transition:transform .15s,border-color .15s}
+.link:hover{transform:translateY(-2px);border-color:var(--acc)}
+.link:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.lt{display:flex;flex-direction:column;gap:4px}
+.lgo{display:inline-flex;align-items:center;gap:6px;font:700 14px var(--body);color:var(--acc)}
 </style>
 </head>
 <body>
@@ -347,6 +353,11 @@ function toast(t){const e=document.createElement("div");e.className="toast";e.te
 function gain(n){const l0=lvl(st.xp);st.xp+=n;pop("+"+n+" XP");const l1=lvl(st.xp);if(l1>l0){toast("Level "+l1+": "+TITLES[Math.min(l1-1,5)]);confetti()}save()}
 function confetti(){if(RM)return;const w=document.createElement("div");w.className="confetti";for(let i=0;i<30;i++){const s=document.createElement("i");s.style.cssText=`left:${Math.random()*100}%;background:var(--k${1+i%6});animation-delay:${Math.random()*.4}s;--dx:${(Math.random()-.5)*180}px`;w.appendChild(s)}document.body.appendChild(w);setTimeout(()=>w.remove(),2400)}
 
+/* ---------- More tools (links to the other free student sites) ---------- */
+const TOOLS=[
+ {name:"PDF Tools",desc:"Merge, split and rotate PDF files.",url:"https://aggarwalhim.github.io/pdfs_tools/"},
+ {name:"Student Tools",desc:"Free everyday tools for students.",url:"https://aggarwalhim.github.io/github.com-aggarwalhim-student-tools/"}];
+const ARROW='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>';
 /* ---------- Home ---------- */
 function home(){view="home";
  const c=S(),total=c.rows.length,kn=mapOf(st.known,setK),knN=Object.keys(kn).length,wk=Object.keys(mapOf(st.weak,setK)).length;
@@ -363,6 +374,7 @@ function home(){view="home";
 <h2 class="sec">Choose a set</h2><div class="tiles">${Object.keys(SETS).map(k=>{const r=SETS[k].rows.length,n=Object.keys(mapOf(st.known,k)).length;return `<button class="tile${k===setK?' on':''}" data-a="set" data-k="${k}"><span class="tn">${SETS[k].name}</span><span class="tc">${n} / ${r} collected</span><span class="pbar"><i style="width:${Math.round(n/r*100)}%"></i></span></button>`}).join("")}</div>
 <p class="intro">${c.intro}</p>
 <h2 class="sec">Pick a mode</h2><div class="modes">${modes.map(m=>`<button class="mode" data-a="mode" data-m="${m[0]}"><span class="lab">${m[3]}</span><span class="mt">${m[1]}</span><span class="md">${m[2]}</span></button>`).join("")}</div>
+<h2 class="sec">More free tools</h2><div class="links">${TOOLS.map(t=>`<a class="link" href="${t.url}" target="_blank" rel="noopener"><span class="lt"><span class="mt">${t.name}</span><span class="md">${t.desc}</span></span><span class="lgo">Open ${ARROW}</span></a>`).join("")}</div>
 <h2 class="sec">Herbarium: ${knN} / ${total} collected</h2><div class="herb">${c.rows.map(d=>kn[d[0]]?`<div class="spec got" ${col(d)}>${d[0]}</div>`:`<div class="spec">?</div>`).join("")}</div>
 <h2 class="sec">Badges</h2><div class="badges">${badges.map(b=>`<span class="badge${b[1]?' on':''}">${b[0]}</span>`).join("")}</div>`)}
 

@@ -8,6 +8,7 @@ A free, single-page study and quiz tool for B.Pharm and D.Pharm students (Pharma
 - **Quiz:** 10 questions with 50:50 hints, a streak counter, an optional timer and a retry round for missed questions.
 - **Match pairs:** pick one category (family, chemical class, constituent, use and more). Every round has 5 pairs of that category, and rounds repeat with new pairs.
 - **Study table:** searchable and colour coded by chemical class.
+- **More free tools:** link cards on the home screen to the PDF Tools and Student Tools sites. Edit the `TOOLS` array in `index.html` to add more.
 - **Herbarium, levels and badges:** progress is saved in the browser (per device).
 
 ## Quiz sets
